@@ -1,4 +1,4 @@
-import SwapElements from './SwapElement';
+import SwapElements from './SwapElements';
 
 export default {
   __init__: [ 'swapElements' ],

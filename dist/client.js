@@ -158,10 +158,10 @@ function addModule(extensionModule) {
 
 /***/ }),
 
-/***/ "./client/features/swap-elements/SwapElement.js":
-/*!******************************************************!*\
-  !*** ./client/features/swap-elements/SwapElement.js ***!
-  \******************************************************/
+/***/ "./client/features/swap-elements/SwapElements.js":
+/*!*******************************************************!*\
+  !*** ./client/features/swap-elements/SwapElements.js ***!
+  \*******************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -185,12 +185,12 @@ module.exports = SwapElements;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _SwapElement__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SwapElement */ "./client/features/swap-elements/SwapElement.js");
-/* harmony import */ var _SwapElement__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_SwapElement__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _SwapElements__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SwapElements */ "./client/features/swap-elements/SwapElements.js");
+/* harmony import */ var _SwapElements__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_SwapElements__WEBPACK_IMPORTED_MODULE_0__);
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   __init__: ['swapElements'],
-  swapElements: ['type', _SwapElement__WEBPACK_IMPORTED_MODULE_0___default.a]
+  swapElements: ['type', _SwapElements__WEBPACK_IMPORTED_MODULE_0___default.a]
 });
 
 /***/ }),
