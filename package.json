@@ -1,0 +1,22 @@
+{
+  "name": "camunda-modeler-swap-elements-plugin",
+  "version": "0.0.0",
+  "description": "Camunda Modeler plugin for swapping elemets",
+  "main": "index.js",
+  "scripts": {
+    "all": "webpack -c",
+    "lint": "eslint .",
+    "dev": "webpack -w",
+    "test": "echo \"no tests\" && exit 0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-react": "^7.9.4",
+    "babel-loader": "^8.1.0",
+    "camunda-modeler-plugin-helpers": "^3.4.0-alpha.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-bpmn-io": "^0.11.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  }
+}
