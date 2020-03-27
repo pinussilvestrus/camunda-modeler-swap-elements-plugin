@@ -16,6 +16,7 @@ export default class SwapElementsPlugin extends PureComponent {
   state = {
     activeTab: null,
     activeModeler: null,
+    disabled: true,
     modelers: []
   }
 
@@ -57,13 +58,42 @@ export default class SwapElementsPlugin extends PureComponent {
           [tab.id]: modeler
         }
       });
+
+      const eventBus = modeler.get('eventBus');
+
+      eventBus.on('selection.changed', this.handleSelectionChange);
+    });
+  }
+
+  handleSelectionChange = (context) => {
+    const {
+      newSelection: selectedElements
+    } = context;
+
+    const {
+      activeTab
+    } = this.state;
+
+    const modeler = this.getModeler(activeTab);
+
+    const swapElements = modeler.get('swapElements');
+
+    const canBeSwapped = swapElements.canBeSwapped(selectedElements);
+
+    this.setState({
+      disabled: !canBeSwapped
     });
   }
 
   swapSelectedElements = () => {
     const {
-      activeTab
+      activeTab,
+      disabled
     } = this.state;
+
+    if (disabled) {
+      return;
+    }
 
     const modeler = this.getModeler(activeTab);
 
@@ -85,9 +115,17 @@ export default class SwapElementsPlugin extends PureComponent {
   }
 
   render() {
+    const {
+      disabled
+    } = this.state;
+
+    log(disabled);
+
     return <Fragment>
       <Fill slot="toolbar" group="9_swapElements">
-        <ExchangeSvg className="swap-elements-icon" onClick={ this.swapSelectedElements } />
+        <ExchangeSvg
+          className={ 'swap-elements-icon ' + (disabled ? 'disabled' : '') }
+          onClick={ this.swapSelectedElements } />
       </Fill>
     </Fragment>;
   }

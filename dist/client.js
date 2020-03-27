@@ -2708,13 +2708,35 @@ class SwapElementsPlugin extends camunda_modeler_plugin_helpers_react__WEBPACK_I
     _defineProperty(this, "state", {
       activeTab: null,
       activeModeler: null,
+      disabled: true,
       modelers: []
+    });
+
+    _defineProperty(this, "handleSelectionChange", context => {
+      const {
+        newSelection: selectedElements
+      } = context;
+      const {
+        activeTab
+      } = this.state;
+      const modeler = this.getModeler(activeTab);
+      const swapElements = modeler.get('swapElements');
+      const canBeSwapped = swapElements.canBeSwapped(selectedElements);
+      this.setState({
+        disabled: !canBeSwapped
+      });
     });
 
     _defineProperty(this, "swapSelectedElements", () => {
       const {
-        activeTab
+        activeTab,
+        disabled
       } = this.state;
+
+      if (disabled) {
+        return;
+      }
+
       const modeler = this.getModeler(activeTab);
       const swapElements = modeler.get('swapElements');
       const selection = modeler.get('selection');
@@ -2749,6 +2771,8 @@ class SwapElementsPlugin extends camunda_modeler_plugin_helpers_react__WEBPACK_I
           [tab.id]: modeler
         }
       });
+      const eventBus = modeler.get('eventBus');
+      eventBus.on('selection.changed', this.handleSelectionChange);
     });
   }
 
@@ -2760,11 +2784,15 @@ class SwapElementsPlugin extends camunda_modeler_plugin_helpers_react__WEBPACK_I
   }
 
   render() {
+    const {
+      disabled
+    } = this.state;
+    log(disabled);
     return /*#__PURE__*/camunda_modeler_plugin_helpers_react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(camunda_modeler_plugin_helpers_react__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, /*#__PURE__*/camunda_modeler_plugin_helpers_react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(camunda_modeler_plugin_helpers_components__WEBPACK_IMPORTED_MODULE_1__["Fill"], {
       slot: "toolbar",
       group: "9_swapElements"
     }, /*#__PURE__*/camunda_modeler_plugin_helpers_react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_resources_exchange_svg__WEBPACK_IMPORTED_MODULE_3__["default"], {
-      className: "swap-elements-icon",
+      className: 'swap-elements-icon ' + (disabled ? 'disabled' : ''),
       onClick: this.swapSelectedElements
     })));
   }
@@ -2897,7 +2925,8 @@ class SwapElements {
     this._swapPositions(elementA, elementB); // (2) swap connected connections
 
 
-    this._swapConnections(connections, elementA, elementB);
+    this._swapConnections(connections, elementA, elementB); // todo(pinussilvestrus): handle text annotations and external labels
+
   }
 
   _saveAndRemoveConnections(elementA, elementB) {

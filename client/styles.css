@@ -15,3 +15,13 @@
   background: #f8f8f8;
   border: solid 1px #cccccc;
 }
+
+.swap-elements-icon.disabled {
+  fill: #999;
+  cursor: default;
+}
+
+.swap-elements-icon.disabled:hover {
+  background: none;
+  border-color: white;
+}
