@@ -1,4 +1,7 @@
-import { PureComponent } from 'camunda-modeler-plugin-helpers/react';
+/* eslint-disable no-unused-vars*/
+import React, { PureComponent, Fragment } from 'camunda-modeler-plugin-helpers/react';
+
+import { Fill } from 'camunda-modeler-plugin-helpers/components';
 
 import SwapElements from './features/swap-elements';
 
@@ -7,6 +10,12 @@ import SwapElements from './features/swap-elements';
  * An extension that adds a toolbar extension to swap two elements
  */
 export default class SwapElementsPlugin extends PureComponent {
+
+  state = {
+    activeTab: null,
+    activeModeler: null,
+    modelers: []
+  }
 
   constructor(props) {
 
@@ -17,33 +26,70 @@ export default class SwapElementsPlugin extends PureComponent {
     } = props;
 
     subscribe('bpmn.modeler.configure', (event) => {
-
       const {
-        tab,
         middlewares
       } = event;
-
-      log('Creating editor for tab', tab);
 
       middlewares.push(addModule(SwapElements));
     });
 
-
-    subscribe('bpmn.modeler.created', (event) => {
-
+    subscribe('app.activeTabChanged', (event) => {
       const {
-        tab,
-        modeler,
+        activeTab
       } = event;
 
-      log('Modeler created for tab', tab, modeler);
-
+      this.setState({
+        activeTab
+      });
     });
 
+    subscribe('bpmn.modeler.created', (event) => {
+      const {
+        tab,
+        modeler
+      } = event;
+
+      this.setState({
+        modelers: {
+          ...this.state.modelers,
+          [tab.id]: modeler
+        }
+      });
+    });
+  }
+
+  swapSelectedElements = () => {
+    const {
+      activeTab
+    } = this.state;
+
+    const modeler = this.getModeler(activeTab);
+
+    const swapElements = modeler.get('swapElements');
+
+    const selection = modeler.get('selection');
+
+    const currentSelection = selection.get();
+
+    swapElements.trigger(currentSelection);
+  }
+
+  getModeler(tab) {
+    const {
+      modelers
+    } = this.state;
+
+    return modelers[tab.id];
   }
 
   render() {
-    return null;
+    return <Fragment>
+      <Fill slot="toolbar" group="9_swapElements">
+        <button type="button" onClick={ this.swapSelectedElements }>
+          Swap elements
+        </button>
+      </Fill>
+    </Fragment>;
   }
 }
 
