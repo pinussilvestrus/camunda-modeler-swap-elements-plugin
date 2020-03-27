@@ -63,6 +63,8 @@ class SwapElements {
 
     // (2) swap connected connections
     this._swapConnections(connections, elementA, elementB);
+
+    // todo(pinussilvestrus): handle text annotations and external labels
   }
 
   _saveAndRemoveConnections(elementA, elementB) {
