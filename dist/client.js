@@ -204,6 +204,45 @@ function addModule(extensionModule) {
 
 /***/ }),
 
+/***/ "./client/features/swap-elements/BpmnSwapElements.js":
+/*!***********************************************************!*\
+  !*** ./client/features/swap-elements/BpmnSwapElements.js ***!
+  \***********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var min_dash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! min-dash */ "./node_modules/min-dash/dist/index.esm.js");
+
+
+class BpmnSwapElements {
+  constructor(swapElements) {
+    // register filter for container elements
+    // todo(pinussilvestrus): allow container elements to be swapped, if same type
+    swapElements.registerFilter(elements => {
+      return Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["filter"])(elements, element => !isAny(element, ['bpmn:Process', 'bpmn:Participant', 'bpmn:SubProcess']));
+    });
+  }
+
+}
+
+BpmnSwapElements.$inject = ['swapElements'];
+/* harmony default export */ __webpack_exports__["default"] = (BpmnSwapElements); // helpers //////////
+
+function isAny(element, types) {
+  return Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["some"])(types, type => {
+    return is(element, type);
+  });
+}
+
+function is(element, type) {
+  const bo = element.businessObject;
+  return bo && typeof bo.$instanceOf === 'function' && bo.$instanceOf(type);
+}
+
+/***/ }),
+
 /***/ "./client/features/swap-elements/SwapElements.js":
 /*!*******************************************************!*\
   !*** ./client/features/swap-elements/SwapElements.js ***!
@@ -237,11 +276,21 @@ class SwapElements {
     this._filters.push(filterFn);
   }
 
-  trigger(elements) {
+  canBeSwapped(elements) {
     const swappableElements = this._filterElements(elements); // only allow to swap two elements
 
 
     if (swappableElements.length !== 2) {
+      return false;
+    }
+
+    return swappableElements;
+  }
+
+  trigger(elements) {
+    const swappableElements = this.canBeSwapped(elements);
+
+    if (!swappableElements) {
       return;
     }
 
@@ -474,10 +523,13 @@ function isSharedConnection(connection, elementA, elementB) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _SwapElements__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SwapElements */ "./client/features/swap-elements/SwapElements.js");
+/* harmony import */ var _BpmnSwapElements__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./BpmnSwapElements */ "./client/features/swap-elements/BpmnSwapElements.js");
+
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  __init__: ['swapElements'],
-  swapElements: ['type', _SwapElements__WEBPACK_IMPORTED_MODULE_0__["default"]]
+  __init__: ['swapElements', 'bpmnSwapElements'],
+  swapElements: ['type', _SwapElements__WEBPACK_IMPORTED_MODULE_0__["default"]],
+  bpmnSwapElements: ['type', _BpmnSwapElements__WEBPACK_IMPORTED_MODULE_1__["default"]]
 });
 
 /***/ }),

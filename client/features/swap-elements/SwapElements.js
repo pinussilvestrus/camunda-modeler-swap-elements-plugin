@@ -30,11 +30,21 @@ class SwapElements {
     this._filters.push(filterFn);
   }
 
-  trigger(elements) {
+  canBeSwapped(elements) {
     const swappableElements = this._filterElements(elements);
 
     // only allow to swap two elements
     if (swappableElements.length !== 2) {
+      return false;
+    }
+
+    return swappableElements;
+  }
+
+  trigger(elements) {
+    const swappableElements = this.canBeSwapped(elements);
+
+    if (!swappableElements) {
       return;
     }
 
@@ -161,7 +171,6 @@ class SwapElements {
       this._createConnection(source, target, connection);
     });
   }
-
 
   _filterElements(elements) {
     const filters = this._filters;
