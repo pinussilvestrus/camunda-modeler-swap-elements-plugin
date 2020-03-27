@@ -253,6 +253,8 @@ function is(element, type) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var min_dash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! min-dash */ "./node_modules/min-dash/dist/index.esm.js");
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../util */ "./client/util/index.js");
+
 
 
 class SwapElements {
@@ -318,11 +320,11 @@ class SwapElements {
       outgoing: outgoingB
     } = elementB;
     const saved = {
-      incomingA: copyUniqueConnections(incomingA, elementA, elementB),
-      outgoingA: copyUniqueConnections(outgoingA, elementA, elementB),
-      incomingB: copyUniqueConnections(incomingB, elementA, elementB),
-      outgoingB: copyUniqueConnections(outgoingB, elementA, elementB),
-      shared: copySharedConnections([...incomingA, ...outgoingA, ...incomingB, ...outgoingB], elementA, elementB)
+      incomingA: Object(_util__WEBPACK_IMPORTED_MODULE_1__["copyUniqueConnections"])(incomingA, elementA, elementB),
+      outgoingA: Object(_util__WEBPACK_IMPORTED_MODULE_1__["copyUniqueConnections"])(outgoingA, elementA, elementB),
+      incomingB: Object(_util__WEBPACK_IMPORTED_MODULE_1__["copyUniqueConnections"])(incomingB, elementA, elementB),
+      outgoingB: Object(_util__WEBPACK_IMPORTED_MODULE_1__["copyUniqueConnections"])(outgoingB, elementA, elementB),
+      shared: Object(_util__WEBPACK_IMPORTED_MODULE_1__["copySharedConnections"])([...incomingA, ...outgoingA, ...incomingB, ...outgoingB], elementA, elementB)
     }; // temporaly remove connections to reduce reconnection noise
 
     modeling.removeElements([...incomingA, ...outgoingA, ...incomingB, ...outgoingB]);
@@ -429,84 +431,6 @@ function roundPoint(point) {
     y: Math.round(point.y)
   };
 }
-/**
- * Generates a copied version of an original connection element.
- *
- * @param {Connection} connection
- *
- * @return {CopiedConnection} copied connection.
- */
-
-
-function copyConnection(connection) {
-  const copy = { ...connection,
-    sourceId: connection.source.id,
-    targetId: connection.target.id,
-    parentId: connection.parent.id
-  };
-  delete copy.source;
-  delete copy.target;
-  delete copy.labels;
-  return copy;
-}
-/**
- * Retrieves all copied connection from a given set which are going from
- * * A -> B
- * * B -> A
- *
- * @param {Array<Connection>} connections
- * @param {Shape} elementA
- * @param {Shape} elementB
- *
- * @return {Array<CopiedConnection>}
- */
-
-
-function copySharedConnections(connections, elementA, elementB) {
-  const copiedConnections = Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["filter"])(Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["map"])(connections, c => copyConnection(c, elementA, elementB)), c => {
-    return c && isSharedConnection(c, elementA, elementB);
-  }); // remove duplicates
-
-  return Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["reduce"])(copiedConnections, (unique, connection) => {
-    if (Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["find"])(unique, item => item.id === connection.id)) {
-      return unique;
-    } else {
-      return [...unique, connection];
-    }
-  }, []);
-}
-/**
- * Retrieves all copied connection from a given set which are NOT going from
- * * A -> B
- * * B -> A
- *
- * @param {Array<Connection>} connections
- * @param {Shape} elementA
- * @param {Shape} elementB
- *
- * @return {Array<CopiedConnection>}
- */
-
-
-function copyUniqueConnections(connections, elementA, elementB) {
-  return Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["filter"])(Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["map"])(connections, c => copyConnection(c, elementA, elementB)), c => {
-    return c && !isSharedConnection(c, elementA, elementB);
-  });
-}
-/**
- * Retrieves whether a (copied) connection goes from A -> B or B -> A
- *
- * @param {CopiedConnection} connection
- * @param {Shape} elementA
- * @param {Shape} elementB
- *
- * @return {Boolean}
- */
-
-
-function isSharedConnection(connection, elementA, elementB) {
-  return connection.sourceId === elementA.id && connection.targetId === elementB.id || connection.sourceId === elementB.id && connection.targetId === elementA.id;
-}
 
 /***/ }),
 
@@ -545,6 +469,98 @@ __webpack_require__.r(__webpack_exports__);
 
 
 Object(camunda_modeler_plugin_helpers__WEBPACK_IMPORTED_MODULE_0__["registerClientExtension"])(_SwapElementsPlugin__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
+/***/ }),
+
+/***/ "./client/util/index.js":
+/*!******************************!*\
+  !*** ./client/util/index.js ***!
+  \******************************/
+/*! exports provided: copyConnection, copySharedConnections, copyUniqueConnections, isSharedConnection */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "copyConnection", function() { return copyConnection; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "copySharedConnections", function() { return copySharedConnections; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "copyUniqueConnections", function() { return copyUniqueConnections; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isSharedConnection", function() { return isSharedConnection; });
+/* harmony import */ var min_dash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! min-dash */ "./node_modules/min-dash/dist/index.esm.js");
+
+/**
+ * Generates a copied version of an original connection element.
+ *
+ * @param {Connection} connection
+ *
+ * @return {CopiedConnection} copied connection.
+ */
+
+function copyConnection(connection) {
+  const copy = { ...connection,
+    sourceId: connection.source.id,
+    targetId: connection.target.id,
+    parentId: connection.parent.id
+  };
+  delete copy.source;
+  delete copy.target;
+  delete copy.labels;
+  return copy;
+}
+/**
+   * Retrieves all copied connection from a given set which are going from
+   * * A -> B
+   * * B -> A
+   *
+   * @param {Array<Connection>} connections
+   * @param {Shape} elementA
+   * @param {Shape} elementB
+   *
+   * @return {Array<CopiedConnection>}
+   */
+
+function copySharedConnections(connections, elementA, elementB) {
+  const copiedConnections = Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["filter"])(Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["map"])(connections, c => copyConnection(c, elementA, elementB)), c => {
+    return c && isSharedConnection(c, elementA, elementB);
+  }); // remove duplicates
+
+  return Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["reduce"])(copiedConnections, (unique, connection) => {
+    if (Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["find"])(unique, item => item.id === connection.id)) {
+      return unique;
+    } else {
+      return [...unique, connection];
+    }
+  }, []);
+}
+/**
+   * Retrieves all copied connection from a given set which are NOT going from
+   * * A -> B
+   * * B -> A
+   *
+   * @param {Array<Connection>} connections
+   * @param {Shape} elementA
+   * @param {Shape} elementB
+   *
+   * @return {Array<CopiedConnection>}
+   */
+
+function copyUniqueConnections(connections, elementA, elementB) {
+  return Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["filter"])(Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["map"])(connections, c => copyConnection(c, elementA, elementB)), c => {
+    return c && !isSharedConnection(c, elementA, elementB);
+  });
+}
+/**
+   * Retrieves whether a (copied) connection goes from A -> B or B -> A
+   *
+   * @param {CopiedConnection} connection
+   * @param {Shape} elementA
+   * @param {Shape} elementB
+   *
+   * @return {Boolean}
+   */
+
+function isSharedConnection(connection, elementA, elementB) {
+  return connection.sourceId === elementA.id && connection.targetId === elementB.id || connection.sourceId === elementB.id && connection.targetId === elementA.id;
+}
 
 /***/ }),
 
