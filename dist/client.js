@@ -217,8 +217,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class SwapElements {
-  constructor(modeling) {
+  constructor(elementRegistry, modeling) {
     this._filters = [];
+    this._elementRegistry = elementRegistry;
     this._modeling = modeling; // register filter for labels and connections
 
     this.registerFilter(elements => {
@@ -244,10 +245,46 @@ class SwapElements {
       return;
     }
 
-    const [elementA, elementB] = swappableElements; // (0) simple replacing does not work, sadly :-(
+    const [elementA, elementB] = swappableElements; // simple replacing does not work, sadly :-(
     // this._modeling.replaceShape(elementA, newShapeB);
-    // (1) swap positions
+    // (0) save and remove connections
 
+    const connections = this._saveAndRemoveConnections(elementA, elementB); // (1) swap positions
+
+
+    this._swapPositions(elementA, elementB); // (2) swap sizes
+    // todo(pinussilvestrus): is this needed? can prevent via filters to swap different
+    // element types
+    // (3) swap connected connections
+
+
+    this._swapConnections(connections, elementA, elementB);
+  }
+
+  _saveAndRemoveConnections(elementA, elementB) {
+    const modeling = this._modeling;
+    const {
+      incoming: incomingA,
+      outgoing: outgoingA
+    } = elementA;
+    const {
+      incoming: incomingB,
+      outgoing: outgoingB
+    } = elementB;
+    const saved = {
+      incomingA: copyUniqueConnections(incomingA, elementA, elementB),
+      outgoingA: copyUniqueConnections(outgoingA, elementA, elementB),
+      incomingB: copyUniqueConnections(incomingB, elementA, elementB),
+      outgoingB: copyUniqueConnections(outgoingB, elementA, elementB),
+      shared: copySharedConnections([...incomingA, ...outgoingA, ...incomingB, ...outgoingB], elementA, elementB)
+    }; // temporaly remove connections to reduce reconnection noise
+
+    modeling.removeElements([...incomingA, ...outgoingA, ...incomingB, ...outgoingB]);
+    return saved;
+  }
+
+  _swapPositions(elementA, elementB) {
+    const modeling = this._modeling;
     const deltaShapeA = {
       x: getMid(elementB).x - getMid(elementA).x,
       y: getMid(elementB).y - getMid(elementA).y
@@ -256,10 +293,62 @@ class SwapElements {
       x: getMid(elementA).x - getMid(elementB).x,
       y: getMid(elementA).y - getMid(elementB).y
     };
+    modeling.moveShape(elementA, deltaShapeA);
+    modeling.moveShape(elementB, deltaShapeB);
+  }
 
-    this._modeling.moveShape(elementA, deltaShapeA);
+  _createConnection(source, target, connection) {
+    const parent = this._elementRegistry.get(connection.parentId);
 
-    this._modeling.moveShape(elementB, deltaShapeB);
+    delete connection.sourceId;
+    delete connection.targetId;
+    delete connection.parentId;
+
+    this._modeling.createConnection(source, target, connection, parent);
+  }
+
+  _reconnectIncomingConnections(connections, target) {
+    Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["forEach"])(connections, connection => {
+      const source = this._elementRegistry.get(connection.sourceId);
+
+      this._createConnection(source, target, connection);
+    });
+  }
+
+  _reconnectOutgoingConnections(connections, source) {
+    Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["forEach"])(connections, connection => {
+      const target = this._elementRegistry.get(connection.targetId);
+
+      this._createConnection(source, target, connection);
+    });
+  }
+
+  _swapConnections(connections, elementA, elementB) {
+    const {
+      incomingA,
+      outgoingA,
+      incomingB,
+      outgoingB,
+      shared
+    } = connections; // connections of element B -> change to element A
+
+    this._reconnectIncomingConnections(incomingB, elementA);
+
+    this._reconnectOutgoingConnections(outgoingB, elementA); // connections of element A -> change to element B
+
+
+    this._reconnectIncomingConnections(incomingA, elementB);
+
+    this._reconnectOutgoingConnections(outgoingA, elementB); // handle shared connections between A and B
+
+
+    Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["forEach"])(shared, connection => {
+      const source = this._elementRegistry.get(connection.targetId);
+
+      const target = this._elementRegistry.get(connection.sourceId);
+
+      this._createConnection(source, target, connection);
+    });
   }
 
   _filterElements(elements) {
@@ -278,7 +367,7 @@ class SwapElements {
 
 }
 
-SwapElements.$inject = ['modeling'];
+SwapElements.$inject = ['elementRegistry', 'modeling'];
 /* harmony default export */ __webpack_exports__["default"] = (SwapElements); // helpers //////////
 
 function getMid(bounds) {
@@ -293,6 +382,84 @@ function roundPoint(point) {
     x: Math.round(point.x),
     y: Math.round(point.y)
   };
+}
+/**
+ * Generates a copied version of an original connection element.
+ *
+ * @param {Connection} connection
+ *
+ * @return {CopiedConnection} copied connection.
+ */
+
+
+function copyConnection(connection) {
+  const copy = { ...connection,
+    sourceId: connection.source.id,
+    targetId: connection.target.id,
+    parentId: connection.parent.id
+  };
+  delete copy.source;
+  delete copy.target;
+  delete copy.labels;
+  return copy;
+}
+/**
+ * Retrieves all copied connection from a given set which are going from
+ * * A -> B
+ * * B -> A
+ *
+ * @param {Array<Connection>} connections
+ * @param {Shape} elementA
+ * @param {Shape} elementB
+ *
+ * @return {Array<CopiedConnection>}
+ */
+
+
+function copySharedConnections(connections, elementA, elementB) {
+  const copiedConnections = Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["filter"])(Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["map"])(connections, c => copyConnection(c, elementA, elementB)), c => {
+    return c && isSharedConnection(c, elementA, elementB);
+  }); // remove duplicates
+
+  return Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["reduce"])(copiedConnections, (unique, connection) => {
+    if (Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["find"])(unique, item => item.id === connection.id)) {
+      return unique;
+    } else {
+      return [...unique, connection];
+    }
+  }, []);
+}
+/**
+ * Retrieves all copied connection from a given set which are NOT going from
+ * * A -> B
+ * * B -> A
+ *
+ * @param {Array<Connection>} connections
+ * @param {Shape} elementA
+ * @param {Shape} elementB
+ *
+ * @return {Array<CopiedConnection>}
+ */
+
+
+function copyUniqueConnections(connections, elementA, elementB) {
+  return Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["filter"])(Object(min_dash__WEBPACK_IMPORTED_MODULE_0__["map"])(connections, c => copyConnection(c, elementA, elementB)), c => {
+    return c && !isSharedConnection(c, elementA, elementB);
+  });
+}
+/**
+ * Retrieves whether a (copied) connection goes from A -> B or B -> A
+ *
+ * @param {CopiedConnection} connection
+ * @param {Shape} elementA
+ * @param {Shape} elementB
+ *
+ * @return {Boolean}
+ */
+
+
+function isSharedConnection(connection, elementA, elementB) {
+  return connection.sourceId === elementA.id && connection.targetId === elementB.id || connection.sourceId === elementB.id && connection.targetId === elementA.id;
 }
 
 /***/ }),
