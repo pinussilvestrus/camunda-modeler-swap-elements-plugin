@@ -3,6 +3,11 @@
   "version": "0.0.0",
   "description": "Camunda Modeler plugin for swapping elemets",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pinussilvestrus/camunda-modeler-swap-elements-plugin.git"
+  },
+  "license": "MIT",
   "scripts": {
     "all": "webpack -c",
     "lint": "eslint .",
@@ -17,6 +22,7 @@
     "camunda-modeler-plugin-helpers": "^3.4.0-alpha.0",
     "eslint": "^6.8.0",
     "eslint-plugin-bpmn-io": "^0.11.0",
+    "react-svg-loader": "^3.0.3",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11"
   },

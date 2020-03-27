@@ -5,6 +5,8 @@ import { Fill } from 'camunda-modeler-plugin-helpers/components';
 
 import SwapElements from './features/swap-elements';
 
+import ExchangeSvg from '../resources/exchange.svg';
+
 
 /**
  * An extension that adds a toolbar extension to swap two elements
@@ -85,9 +87,7 @@ export default class SwapElementsPlugin extends PureComponent {
   render() {
     return <Fragment>
       <Fill slot="toolbar" group="9_swapElements">
-        <button type="button" onClick={ this.swapSelectedElements }>
-          Swap elements
-        </button>
+        <ExchangeSvg className="swap-elements-icon" onClick={ this.swapSelectedElements } />
       </Fill>
     </Fragment>;
   }

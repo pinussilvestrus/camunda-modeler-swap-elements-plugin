@@ -19,6 +19,10 @@ module.exports = {
             plugins: [ '@babel/plugin-proposal-class-properties' ]
           }
         }
+      },
+      {
+        test: /\.svg$/,
+        loader: 'react-svg-loader'
       }
     ]
   },
