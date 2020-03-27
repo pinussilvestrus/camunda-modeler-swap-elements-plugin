@@ -301,10 +301,7 @@ class SwapElements {
     const connections = this._saveAndRemoveConnections(elementA, elementB); // (1) swap positions
 
 
-    this._swapPositions(elementA, elementB); // (2) swap sizes
-    // todo(pinussilvestrus): is this needed? can prevent via filters to swap different
-    // element types
-    // (3) swap connected connections
+    this._swapPositions(elementA, elementB); // (2) swap connected connections
 
 
     this._swapConnections(connections, elementA, elementB);
