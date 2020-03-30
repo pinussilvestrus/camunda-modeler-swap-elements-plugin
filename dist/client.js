@@ -2787,7 +2787,6 @@ class SwapElementsPlugin extends camunda_modeler_plugin_helpers_react__WEBPACK_I
     const {
       disabled
     } = this.state;
-    log(disabled);
     return /*#__PURE__*/camunda_modeler_plugin_helpers_react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(camunda_modeler_plugin_helpers_react__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, /*#__PURE__*/camunda_modeler_plugin_helpers_react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(camunda_modeler_plugin_helpers_components__WEBPACK_IMPORTED_MODULE_1__["Fill"], {
       slot: "toolbar",
       group: "9_swapElements"

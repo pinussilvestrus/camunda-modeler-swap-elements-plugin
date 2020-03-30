@@ -119,8 +119,6 @@ export default class SwapElementsPlugin extends PureComponent {
       disabled
     } = this.state;
 
-    log(disabled);
-
     return <Fragment>
       <Fill slot="toolbar" group="9_swapElements">
         <ExchangeSvg
